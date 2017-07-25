@@ -1,34 +1,95 @@
-apply plugin: 'maven'
-apply plugin: 'java'
-
 buildscript {
-  ext {
-    snapshot = version.endsWith('-SNAPSHOT')
-  }
+    ext {
+        snapshot = version.endsWith('-SNAPSHOT')
+    }
+    repositories {
+        maven {
+            url "${artifactory_contextUrl}/plugins-release"
+            credentials {
+                username = "${artifactory_user}"
+                password = "${artifactory_password}"
+            }
+            name = "maven-main-cache"
+        }
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.4.18"
+    }
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+plugins {
+    id "com.jfrog.artifactory" version "4.4.18"
+}
+
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: "com.jfrog.artifactory"
+
+version = '1.0.0-SNAPSHOT'
+group = 'com.luno'
+
+///////// BUILD SPECIFICS /////////
+assert JavaVersion.current().java8Compatible:
+        "At least Java $javaVersion is required, current JVM is ${JavaVersion.current()}"
+
+jar {
+    baseName = 'luno-java'
+    manifest {
+        attributes 'Implementation-Title': rootProject.name, 'Implementation-Version': rootProject.version
+    }
+}
 
 task sourceJar(type: Jar) {
-  from sourceSets.main.allJava
+    from sourceSets.main.allJava
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+    }
 }
 
 dependencies {
-  
-  compile 'org.slf4j:slf4j-api:1.7.25'
-  compile 'com.github.mmazi:rescu:1.9.0'
+    compile 'org.slf4j:slf4j-api:1.7.25'
+    compile 'com.github.mmazi:rescu:1.9.0'
 
-  testCompile 'junit:junit:4.8.1'
-  testRuntime 'ch.qos.logback:logback-classic:1.2.2'
+    testCompile 'junit:junit:4.8.1'
+}
+
+task wrapper(type: Wrapper, group: 'Gradle') {
+    gradleVersion = '3.5'
 }
 
 repositories {
-  //mavenLocal()
-  mavenCentral()
+    add buildscript.repositories.getByName("maven-main-cache")
+    jcenter()
+    mavenCentral()
 }
 
-// Gradle Wrapper
-task wrapper(type: Wrapper, group: 'Gradle') {
-  gradleVersion = '3.5'
+artifactory {
+    contextUrl = "${artifactory_contextUrl}"
+    publish {
+        repository {
+            repoKey = 'libs-snapshot-local'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+
+        }
+        defaults {
+            publications ('mavenJava')
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
 }
