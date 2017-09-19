@@ -1,6 +1,9 @@
 package com.luno.dto.trade;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -64,8 +67,9 @@ public class LunoUserTrades {
             this.buy = buy;
         }
         
-        public Date getTimestamp() {
-            return new Date(timestamp);
+        public LocalDateTime getTimestamp() {
+            return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp),
+                    ZoneId.systemDefault());
         }
 
         @Override
