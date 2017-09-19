@@ -1,6 +1,9 @@
 package com.luno.dto.account;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -57,8 +60,9 @@ public class LunoAccountTransactions {
             this.description = description;
         }
         
-        public Date getTimestamp() {
-            return new Date(timestamp);
+        public LocalDateTime getTimestamp() {
+            return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp),
+                    ZoneId.systemDefault());
         }
 
         @Override

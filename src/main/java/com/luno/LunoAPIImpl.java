@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.stereotype.Service;
 import si.mazi.rescu.BasicAuthCredentials;
 import si.mazi.rescu.RestProxyFactory;
 
@@ -30,18 +31,32 @@ import com.luno.dto.trade.LunoPostOrder;
 import com.luno.dto.trade.OrderType;
 import com.luno.dto.trade.State;
 
+@Service
 public class LunoAPIImpl implements LunoAPI {
     
     private final static String URI = "https://api.mybitx.com";
     private final LunoAuthenticated luno;
-    private final BasicAuthCredentials auth;
-    
+    private BasicAuthCredentials auth;
+
+    public LunoAPIImpl() {
+        this(URI);
+    }
+
+    public LunoAPIImpl(String uri) {
+        luno = RestProxyFactory.createProxy(LunoAuthenticated.class, uri);
+    }
+
     public LunoAPIImpl(String key, String secret) {
         this(key, secret, URI);
     }
     
     public LunoAPIImpl(String key, String secret, String uri) {
-        luno = RestProxyFactory.createProxy(LunoAuthenticated.class, uri);
+        this(uri);
+        auth = new BasicAuthCredentials(key, secret);
+    }
+
+    @Override
+    public void setBasicAuthCredentials(String key, String secret) {
         auth = new BasicAuthCredentials(key, secret);
     }
 
