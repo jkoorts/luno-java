@@ -27,6 +27,8 @@ import com.luno.dto.trade.State;
 
 public interface LunoAPI {
 
+    void setBasicAuthCredentials(String key, String secret);
+
     /**
      * Market data API calls can be accessed by anyone without authentication.
      * @param pair required - Currency pair e.g. XBTZAR
